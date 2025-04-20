@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login | X</title>
+</head>
+<body>
+  <h1>Login</h1>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button id="loginBtn">Login</button>
+  <button id="signupBtn">Sign Up</button>
+  <p id="msg"></p>
+
+  <!-- Enlace para recuperación de contraseña -->
+  <p><a href="#" id="forgotPasswordLink">Forgot your password?</a></p>
+
+  <!-- Formulario de recuperación de contraseña -->
+  <div id="resetPasswordForm" style="display: none;">
+    <input type="email" id="resetEmail" placeholder="Enter your email to reset password" />
+    <button id="resetPasswordBtn">Reset Password</button>
+    <button id="cancelResetBtn">Cancel</button>
+    <p id="resetMsg"></p>
+  </div>
+
+  <script type="module">
+    import { auth } from './script/firebase.js';
+    import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const msg = document.getElementById('msg');
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    const resetEmailInput = document.getElementById('resetEmail');
+    const resetMsg = document.getElementById('resetMsg');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const cancelResetBtn = document.getElementById('cancelResetBtn');
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
+
+    // Si el usuario ya está autenticado, redirigir a la página principal
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'index.html'; // Si ya está autenticado, redirigir a index
+      }
+    });
+
+    // Iniciar sesión
+    document.getElementById('loginBtn').onclick = async () => {
+      try {
+        await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
+        window.location.href = 'index.html';
+      } catch (e) {
+        msg.textContent = e.message;
+      }
+    };
+
+    // Crear cuenta
+    document.getElementById('signupBtn').onclick = async () => {
+      try {
+        await createUserWithEmailAndPassword(auth, emailInput.value, passInput.value);
+        msg.textContent = 'User created. You can now login.';
+      } catch (e) {
+        msg.textContent = e.message;
+      }
+    };
+
+    // Mostrar el formulario de recuperación de contraseña
+    forgotPasswordLink.onclick = () => {
+      resetPasswordForm.style.display = 'block'; // Mostrar el formulario
+    };
+
+    // Cancelar recuperación de contraseña
+    cancelResetBtn.onclick = () => {
+      resetPasswordForm.style.display = 'none'; // Ocultar el formulario
+    };
+
+    // Enviar correo para restablecer la contraseña
+    resetPasswordBtn.onclick = async () => {
+      const email = resetEmailInput.value;
+      if (!email) {
+        resetMsg.textContent = 'Please enter a valid email address.';
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        resetMsg.textContent = 'Password reset email sent! Please check your inbox.';
+      } catch (e) {
+        resetMsg.textContent = e.message;
+      }
+    };
+  </script>
+</body>
+</html>
