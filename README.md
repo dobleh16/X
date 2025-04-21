@@ -23,7 +23,7 @@ A simple social media app where users can sign up, authenticate, create posts, l
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/build-x.git
+git clone https://github.com/dobleh16/X.git
 ```
 
 2. Open the project folder in Visual Studio Code.
