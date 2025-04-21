@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>X | Timeline</title>
+</head>
+<body>
+  <h1>Welcome to X</h1>
+  <button id="logoutBtn">Logout</button>
+  <a href="profile.html">Go to My Profile</a>
+
+  <h2>Create a Post</h2>
+  <textarea id="postContent" rows="3" cols="40" placeholder="Write something..."></textarea><br>
+  <button id="postBtn">Post</button>
+
+  <h2>Timeline (My Posts)</h2>
+  <ul id="timeline"></ul>
+
+  <script type="module">
+    import { auth, db } from './script/firebase.js';
+    import {
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+      collection,
+      query,
+      where,
+      orderBy,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const postContent = document.getElementById('postContent');
+    const postBtn = document.getElementById('postBtn');
+    const timeline = document.getElementById('timeline');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    let currentUser;
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        loadPosts();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    postBtn.onclick = async () => {
+      const content = postContent.value.trim();
+      if (content === '') return;
+
+      await addDoc(collection(db, 'posts'), {
+        uid: currentUser.uid,
+        content,
+        createdAt: new Date()
+      });
+
+      postContent.value = '';
+      loadPosts();
+    };
+
+    async function loadPosts() {
+      timeline.innerHTML = '';
+      const q = query(
+        collection(db, 'posts'),
+        where('uid', '==', currentUser.uid),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      for (const docSnap of querySnapshot.docs) {
+        const data = docSnap.data();
+        const postId = docSnap.id;
+
+        // Verificar si el usuario ya dio like
+        const likeRef = collection(db, 'posts', postId, 'likes');
+        const likeQuery = query(likeRef, where('uid', '==', currentUser.uid));
+        const likeSnapshot = await getDocs(likeQuery);
+        const hasLiked = !likeSnapshot.empty;
+
+        // Contar likes
+        const totalLikes = (await getDocs(likeRef)).size;
+
+        // Obtener respuestas
+        const repliesRef = collection(db, 'posts', postId, 'replies');
+        const replySnapshot = await getDocs(repliesRef);
+
+        let repliesHtml = '';
+        replySnapshot.forEach(replyDoc => {
+          const replyData = replyDoc.data();
+          repliesHtml += `<p style="margin-left:20px;">💬 ${replyData.text}</p>`;
+        });
+
+        let replyFormHtml = '';
+        if (data.uid === currentUser.uid) {
+          replyFormHtml = `
+            <textarea id="reply-${postId}" rows="1" cols="30" placeholder="Reply..."></textarea>
+            <button onclick="replyToPost('${postId}')">Reply</button>
+          `;
+        }
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <p>${data.content}</p>
+          <p>Likes: ${totalLikes}</p>
+          <button onclick="likePost('${postId}')" ${hasLiked ? 'disabled' : ''}>
+            ${hasLiked ? 'Liked' : 'Like'}
+          </button>
+          <button onclick="deletePost('${postId}')">Delete</button>
+          ${repliesHtml}
+          ${replyFormHtml}
+        `;
+        timeline.appendChild(li);
+      }
+    }
+
+    window.likePost = async (postId) => {
+      const likeRef = collection(db, 'posts', postId, 'likes');
+      await addDoc(likeRef, { uid: currentUser.uid });
+      loadPosts();
+    };
+
+    window.deletePost = async (postId) => {
+      await deleteDoc(doc(db, 'posts', postId));
+      loadPosts();
+    };
+
+    window.replyToPost = async (postId) => {
+      const textarea = document.getElementById(`reply-${postId}`);
+      const text = textarea.value.trim();
+      if (text === '') return;
+
+      await addDoc(collection(db, 'posts', postId, 'replies'), {
+        text,
+        uid: currentUser.uid,
+        createdAt: new Date()
+      });
+
+      textarea.value = '';
+      loadPosts();
+    };
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      window.location.href = 'login.html';
+    };
+  </script>
+</body>
+</html>
