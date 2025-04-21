@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>X | Profile</title>
+</head>
+<body>
+  <h1>My Profile</h1>
+  <button id="logoutBtn">Logout</button>
+  <a href="timeline.html">Back to Timeline</a>
+
+  <h2>My Posts</h2>
+  <ul id="profilePosts"></ul>
+
+  <script type="module">
+    import { auth, db } from './script/firebase.js';
+    import {
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import {
+      collection,
+      query,
+      where,
+      orderBy,
+      getDocs,
+      deleteDoc,
+      doc,
+      addDoc
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const profilePosts = document.getElementById('profilePosts');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    let currentUser;
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        currentUser = user;
+        loadUserPosts();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    async function loadUserPosts() {
+      profilePosts.innerHTML = '';
+      const q = query(
+        collection(db, 'posts'),
+        where('uid', '==', currentUser.uid),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      for (const docSnap of querySnapshot.docs) {
+        const data = docSnap.data();
+        const postId = docSnap.id;
+
+        // Verificar si ya dio like
+        const likeRef = collection(db, 'posts', postId, 'likes');
+        const likeQuery = query(likeRef, where('uid', '==', currentUser.uid));
+        const likeSnapshot = await getDocs(likeQuery);
+        const hasLiked = !likeSnapshot.empty;
+
+        // Contar likes
+        const totalLikes = (await getDocs(likeRef)).size;
+
+        // Obtener respuestas
+        const repliesRef = collection(db, 'posts', postId, 'replies');
+        const replySnapshot = await getDocs(repliesRef);
+
+        let repliesHtml = '';
+        replySnapshot.forEach(replyDoc => {
+          const replyData = replyDoc.data();
+          repliesHtml += `<p style="margin-left:20px;">💬 ${replyData.text}</p>`;
+        });
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <p>${data.content}</p>
+          <p>Likes: ${totalLikes}</p>
+          <button onclick="likePost('${postId}')" ${hasLiked ? 'disabled' : ''}>
+            ${hasLiked ? 'Liked' : 'Like'}
+          </button>
+          <button onclick="deletePost('${postId}')">Delete</button>
+          ${repliesHtml}
+          <textarea id="reply-${postId}" rows="1" cols="30" placeholder="Reply..."></textarea>
+          <button onclick="replyToPost('${postId}')">Reply</button>
+        `;
+        profilePosts.appendChild(li);
+      }
+    }
+
+    window.likePost = async (postId) => {
+      const likeRef = collection(db, 'posts', postId, 'likes');
+      await addDoc(likeRef, { uid: currentUser.uid });
+      loadUserPosts();
+    };
+
+    window.deletePost = async (postId) => {
+      await deleteDoc(doc(db, 'posts', postId));
+      loadUserPosts();
+    };
+
+    window.replyToPost = async (postId) => {
+      const textarea = document.getElementById(`reply-${postId}`);
+      const text = textarea.value.trim();
+      if (text === '') return;
+
+      await addDoc(collection(db, 'posts', postId, 'replies'), {
+        text,
+        uid: currentUser.uid,
+        createdAt: new Date()
+      });
+
+      textarea.value = '';
+      loadUserPosts();
+    };
+
+    logoutBtn.onclick = async () => {
+      await signOut(auth);
+      window.location.href = 'login.html';
+    };
+  </script>
+</body>
+</html>
