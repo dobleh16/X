@@ -16,6 +16,8 @@
     });
   });
 </script>
+<div id="feature-container"></div>
+<script type="module" src="script/featureFlags.js"></script>
 </head>
 <body>
   <h1>Welcome to X</h1>
@@ -28,6 +30,8 @@
 
   <h2>Timeline (My Posts)</h2>
   <ul id="timeline"></ul>
+
+  <div id="feature-container"></div>
 
   <script type="module">
     import { auth, db } from './script/firebase.js';
@@ -152,5 +156,6 @@
       window.location.href = 'login.html';
     };
   </script>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>
