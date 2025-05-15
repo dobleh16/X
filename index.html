@@ -16,31 +16,8 @@
     });
   });
 </script>
-<script src="https://unpkg.com/@growthbook/growthbook/dist/bundles/index.min.js"></script>
-<script>
-  const gb = new growthbook.GrowthBook({
-    features: {
-      "show-button": {
-        defaultValue: true // o false para desactivarlo
-      }
-    }
-  });
-
-  window.showButtonFlag = gb.feature("show-button").value;
-</script>
-
 </head>
 <body>
-  <div id="feature-flag-container"></div>
-
-  <script>
-    const container = document.getElementById('feature-flag-container');
-    if (window.showButtonFlag) {
-      container.innerHTML = '<button>Mi botón</button>';
-    } else {
-      container.innerHTML = '<a href="#">Mi enlace</a>';
-    }
-  </script>
   <h1>Welcome to X</h1>
   <button id="logoutBtn">Logout</button>
   <a href="profile.html">Go to My Profile</a>
