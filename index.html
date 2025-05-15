@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <title>X | Timeline</title>
+<!-- Sentry SDK -->
+<script src="https://js.sentry-cdn.com/e6cfc1925db7c9bd2192efe5c70626a3.min.js" crossorigin="anonymous"></script>
+<script>
+  Sentry.onLoad(function() {
+    Sentry.init({
+      dsn: 'https://e6cfc1925db7c9bd2192efe5c70626a3.ingest.sentry.io/4507097023295488',
+      integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+      tracesSampleRate: 1.0,
+      replaysSessionSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+    });
+  });
+</script>
 </head>
 <body>
   <h1>Welcome to X</h1>
