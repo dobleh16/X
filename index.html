@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <title>X | Timeline</title>
-<!-- Sentry SDK -->
-<script src="https://js.sentry-cdn.com/e6cfc1925db7c9bd2192efe5c70626a3.min.js" crossorigin="anonymous"></script>
-<script>
-  Sentry.onLoad(function() {
-    Sentry.init({
-      dsn: 'https://e6cfc1925db7c9bd2192efe5c70626a3.ingest.sentry.io/4507097023295488',
-      integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
-      tracesSampleRate: 1.0,
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
+  <!-- Sentry SDK -->
+  <script src="https://js.sentry-cdn.com/e6cfc1925db7c9bd2192efe5c70626a3.min.js" crossorigin="anonymous"></script>
+  <script>
+    Sentry.onLoad(function () {
+      Sentry.init({
+        dsn: 'https://e6cfc1925db7c9bd2192efe5c70626a3.ingest.sentry.io/4507097023295488',
+        integrations: [new Sentry.BrowserTracing(), new Sentry.Replay()],
+        tracesSampleRate: 1.0,
+        replaysSessionSampleRate: 0.1,
+        replaysOnErrorSampleRate: 1.0,
+      });
     });
-  });
-</script>
+  </script>
 </head>
 <body>
   <h1>Welcome to X</h1>
@@ -29,6 +29,7 @@
   <h2>Timeline (My Posts)</h2>
   <ul id="timeline"></ul>
 
+  <!-- Contenedor del botón o link de feature flag -->
   <div id="feature-container"></div>
 
   <script type="module">
@@ -90,16 +91,13 @@
         const data = docSnap.data();
         const postId = docSnap.id;
 
-        // Verificar si el usuario ya dio like
         const likeRef = collection(db, 'posts', postId, 'likes');
         const likeQuery = query(likeRef, where('uid', '==', currentUser.uid));
         const likeSnapshot = await getDocs(likeQuery);
         const hasLiked = !likeSnapshot.empty;
 
-        // Contar likes
         const totalLikes = (await getDocs(likeRef)).size;
 
-        // Cargar respuestas
         const replyRef = collection(db, 'posts', postId, 'replies');
         const replySnapshot = await getDocs(query(replyRef, orderBy('createdAt', 'asc')));
         let repliesHtml = '';
@@ -154,10 +152,8 @@
       window.location.href = 'login.html';
     };
   </script>
-</body>
-  <!-- Contenedor del botón o link según el feature flag -->
-  <div id="feature-container"></div>
-  <!-- Carga de scripts -->
+
+  <!-- Carga de feature flags -->
   <script type="module" src="./main.js"></script>
 </body>
 </html>
