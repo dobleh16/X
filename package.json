@@ -11,5 +11,8 @@
         "@babel/preset-env": "^7.27.2",
         "babel-jest": "^29.7.0",
         "jest": "^29.7.0"
+    },
+    "dependencies": {
+        "@growthbook/growthbook": "^1.5.1"
     }
 }

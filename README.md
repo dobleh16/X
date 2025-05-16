@@ -6,15 +6,27 @@
 
 # X (formerly Twitter)
 
-A simple social media app where users can sign up, authenticate, create posts, like and reply to their own posts. Built using Firebase for the backend and plain HTML, CSS, and JavaScript for the frontend.
+A simple social media web app where users can sign up, authenticate, create posts, like, and reply to their own posts. Built using Firebase for the backend and plain HTML, CSS, and JavaScript for the frontend.
 
 ## Features
 
 - User authentication with Firebase (including password recovery)
 - View user's profile with their own posts
-- Timeline that shows only the user's posts, ordered by most recent
-- Create and delete posts
-- Like and reply to posts
+- Timeline that displays only the user's posts, ordered by most recent
+- Create, delete, like, and reply to posts
+- **Feature Flags** using [GrowthBook](https://www.growthbook.io/) for conditional rendering
+- **Error Monitoring** with [Sentry](https://sentry.io/)
+- **Unit Tests** with [Jest](https://jestjs.io/)
+- **Continuous Integration (CI)** with GitHub Actions
+
+## Final Deliverable Updates
+
+This last delivery includes:
+- ✅ Integration with **Sentry** for real-time error logging in the frontend.
+- ✅ Setup of **GrowthBook feature flags** with conditional rendering (`featureFlags.js` and `main.js`).
+- ✅ Creation of at least **3 unit tests** using Jest in `utils.test.js` and `timeline.test.js`.
+- ✅ Configuration of a **GitHub Actions CI workflow** that runs tests automatically on push.
+- ✅ (Optional) **Chrome Extension** feature still in progress (to be decided).
 
 ## Installation
 
@@ -24,27 +36,8 @@ A simple social media app where users can sign up, authenticate, create posts, l
 
 ```bash
 git clone https://github.com/dobleh16/X.git
-```
 
-2. Open the project folder in Visual Studio Code.
-
-3. Install the **Live Server** extension:
-   - Go to the Extensions tab (`Ctrl+Shift+X`)
-   - Search for **Live Server** by Ritwick Dey
-   - Click **Install**
-
-4. Start the server:
-   - Right-click on `index.html` and select **Open with Live Server**
-
-5. The app will open in your browser. You can now sign up and use X!
-
-## Firebase Setup
-
-> This project uses Firebase for authentication and Firestore for the database.
-
-Make sure your `firebaseConfig` in `js/firebase.js` is filled with your Firebase project credentials:
-
-```js
+-This project uses Firebase for authentication and Firestore for the database.
 // Example:
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -54,6 +47,16 @@ const firebaseConfig = {
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID"
 };
-```
 
+## Run Unit Tests:
+-Navigate to the project root and install dependencies:
+
+npm install
+
+## Run tests:
+
+npm test
+
+-Continuous Integration
+This project includes a GitHub Actions workflow (.github/workflows/tests.yml) that runs all Jest tests automatically on push
 
